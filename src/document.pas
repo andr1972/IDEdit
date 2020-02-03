@@ -34,6 +34,8 @@ type
     function TryClose(): Boolean;
     function Save: boolean;
     function SaveAs(AFileName: string): boolean;
+    function GetWordWrap: boolean;
+    procedure SetWordWrap(AValue: boolean);
   end;
 
 
@@ -179,6 +181,22 @@ begin
     fSheet.Caption := GetTitle;
   end;
   result := DoSaveFile;
+end;
+
+function TDocument.GetWordWrap: boolean;
+begin
+  result:=fAtSynEdit.OptWrapMode<>cWrapOff;
+end;
+
+procedure TDocument.SetWordWrap(AValue: boolean);
+var
+  opt: TATSynWrapMode;
+begin
+  if AValue then
+    opt:=cWrapOn
+  else
+    opt:=cWrapOff;
+  fAtSynEdit.OptWrapMode:=opt;
 end;
 
 end.

@@ -19,6 +19,8 @@ type
     actFileSave: TAction;
     actFileSaveAs: TAction;
     actFileSaveAll: TAction;
+    actViewWordWrap: TAction;
+    actlView: TActionList;
     actRevert: TAction;
     actlFile: TActionList;
     imglFile16: TImageList;
@@ -31,6 +33,7 @@ type
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MenuItem7: TMenuItem;
+    MenuItem8: TMenuItem;
     miFileClosePage: TMenuItem;
     miFileOpen: TMenuItem;
     miFileNew: TMenuItem;
@@ -47,6 +50,8 @@ type
     procedure actFileSaveAsExecute(Sender: TObject);
     procedure actFileSaveExecute(Sender: TObject);
     procedure actFileSaveUpdate(Sender: TObject);
+    procedure actViewWordWrapExecute(Sender: TObject);
+    procedure actViewWordWrapUpdate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -210,6 +215,21 @@ end;
 procedure TForm1.actFileSaveUpdate(Sender: TObject);
 begin
   actFileSave.Enabled := fDocumentFactory.GetDocumentCount>0;
+end;
+
+procedure TForm1.actViewWordWrapExecute(Sender: TObject);
+var
+  LDocument: IDocument;
+begin
+  LDocument:=fDocumentFactory.GetActive;
+  actViewWordWrap.Checked:=not actViewWordWrap.Checked;
+  LDocument.WordWrap:=actViewWordWrap.Checked;
+end;
+
+procedure TForm1.actViewWordWrapUpdate(Sender: TObject);
+begin
+  actViewWordWrap.Enabled := fDocumentFactory.GetDocumentCount>0;
+  actViewWordWrap.Checked:= fDocumentFactory.GetActive.WordWrap;
 end;
 
 procedure TForm1.FormActivate(Sender: TObject);

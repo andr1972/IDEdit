@@ -8,15 +8,21 @@ uses
   Classes, SysUtils;
 
 type
+
+  { IDocument }
+
   IDocument = interface ['{33F35F97-56E0-44FD-A0AA-5EA0CAD1C6B5}']
     function GetPath: string;
     function GetTitle: string;
     procedure OpenFile(AFileName: string);
     function ComparePathWith(AOtherPath: string): integer;
     procedure Activate;
+    function GetWordWrap: boolean;
+    procedure SetWordWrap(AValue: boolean);
     function TryClose(): Boolean;
     function Save: boolean;
     function SaveAs(AFileName: string): boolean;
+    property WordWrap: boolean read GetWordWrap write SetWordWrap;
   end;
 
   IUntitledManager = interface ['{476DA6F2-AAED-4923-BBBA-6726E6F8914F}']

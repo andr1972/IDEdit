@@ -41,7 +41,7 @@ object Form1: TForm1
     end
   end
   object MainMenu1: TMainMenu
-    left = 33
+    left = 32
     top = 83
     object MenuItem1: TMenuItem
       Caption = '&File'
@@ -73,13 +73,16 @@ object Form1: TForm1
       end
     end
     object MenuItem2: TMenuItem
-      Caption = 'MenuItem2'
+      Caption = '&View'
+      object MenuItem8: TMenuItem
+        Action = actViewWordWrap
+      end
     end
   end
   object actlFile: TActionList
     Images = imglFile16
-    left = 137
-    top = 75
+    left = 112
+    top = 96
     object actFileNew: TAction
       Category = 'File'
       Caption = 'New'
@@ -1013,5 +1016,16 @@ object Form1: TForm1
   object SaveDialog: TSaveDialog
     left = 172
     top = 37
+  end
+  object actlView: TActionList
+    Images = imglFile16
+    left = 172
+    top = 112
+    object actViewWordWrap: TAction
+      Category = 'View'
+      Caption = 'Word wrap'
+      OnExecute = actViewWordWrapExecute
+      OnUpdate = actViewWordWrapUpdate
+    end
   end
 end
