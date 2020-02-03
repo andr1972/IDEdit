@@ -3,13 +3,14 @@ object Form1: TForm1
   Height = 484
   Top = 287
   Width = 620
-  Caption = 'Pars IDE'
+  Caption = 'IDEdit'
   ClientHeight = 460
   ClientWidth = 620
   KeyPreview = True
   Menu = MainMenu1
   OnActivate = FormActivate
   OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
   LCLVersion = '2.0.6.0'
   object ToolBar1: TToolBar
     Left = 0

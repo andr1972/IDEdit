@@ -38,6 +38,7 @@ type
     procedure actFileOpenExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure MenuItem1Click(Sender: TObject);
   private
     fNotebook: TNicePages;
@@ -56,7 +57,7 @@ var
 
 implementation
 uses
-  intfs;
+  intfs, LCLType;
 
 {$R *.lfm}
 
@@ -73,6 +74,27 @@ begin
   //EdNotebook.OnClose:=@TabClose;
   //EdNotebook.OnDrawTab:=@TabDraw;
   fDocumentFactory:=TDocumentFactory.Create(fNotebook);
+end;
+
+procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+  Number: integer;
+begin
+  if Key in [ord('0')..Ord('9')] then
+  begin
+    if Shift<>[ssAlt] then exit;
+    if Key>ord('0') then Number := Key-ord('1')
+    else Number := 9;
+    if Number<fNotebook.PageCount then
+      fNotebook.PageIndex:=Number;
+    Key:=0;//to avoid beep
+  end else if (Key=VK_TAB) and (ssCtrl in Shift) then
+  begin
+    if ssShift in Shift then
+      fNotebook.ActivePrev()
+    else
+      fNotebook.ActiveNext();
+  end;
 end;
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
