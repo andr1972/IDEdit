@@ -2,6 +2,7 @@ backup/
 lib/
 *.exe
 *.lps
+*.dbg
 idedit
 idedit.res
 

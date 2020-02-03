@@ -17,7 +17,6 @@ type
     actFileOpen: TAction;
     actFileClosePage: TAction;
     actlFile: TActionList;
-    ATSynEdit1: TATSynEdit;
     imglFile16: TImageList;
     imglTb16: TImageList;
     MainMenu1: TMainMenu;
@@ -37,13 +36,19 @@ type
     procedure actFileClosePageUpdate(Sender: TObject);
     procedure actFileNewExecute(Sender: TObject);
     procedure actFileOpenExecute(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
   private
     fNotebook: TNicePages;
     fDocumentFactory: TDocumentFactory;
     procedure DoOpenFile(AFileName: string);
+  protected
+    fWasActivated: boolean;
+    function CmdLineOpenFiles: boolean;
   public
+    procedure UniqInstOtherInstance(Sender: TObject;
+      ParamCount: Integer; const Parameters: array of String);
   end;
 
 var
@@ -97,10 +102,41 @@ begin
   LDocument.Activate;
 end;
 
+function TForm1.CmdLineOpenFiles: boolean;
+var
+  i: integer;
+begin
+  for i:=1 to ParamCount do
+    DoOpenFile(ParamStr(i));
+  result:=ParamCount>1;
+end;
+
+procedure TForm1.UniqInstOtherInstance(Sender: TObject;
+  ParamCount: Integer; const Parameters: array of String);
+var
+  i: integer;
+begin
+  Application.Minimize; // this is what really...
+  Application.Restore;  // brings a form to top
+  Application.BringToFront; // just in case, for orher platforms
+  for i:=0 to ParamCount-1 do
+    DoOpenFile(Parameters[i]);
+end;
+
 procedure TForm1.actFileOpenExecute(Sender: TObject);
 begin
   if OpenDialog.Execute then
     DoOpenFile(OpenDialog.FileName);
+end;
+
+procedure TForm1.FormActivate(Sender: TObject);
+begin
+  inherited;
+  try
+    if not fWasActivated then CmdLineOpenFiles;
+  finally
+    fWasActivated := true
+  end;
 end;
 
 procedure TForm1.actFileNewExecute(Sender: TObject);
