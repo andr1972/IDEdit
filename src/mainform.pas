@@ -67,6 +67,7 @@ begin
   fNotebook:=TNicePages.Create(self);
   InsertControl(fNotebook);
   fNotebook.Align:=alClient;
+  fNotebook.TabPosition:=tpBottom;
   //EdNotebook.OnBeforeCloseQuery:=@TabBeforeCloseQuery;
   //EdNotebook.OnCloseQuery:=@TabCloseQuery;
   //EdNotebook.OnClose:=@TabClose;
