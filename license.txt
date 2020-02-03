@@ -1,0 +1,4 @@
+This code is dual licensed:
+- MPL 2.0
+- LGPL
+Copyright (C) Andrzej Borucki 2020

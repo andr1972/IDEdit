@@ -1,0 +1,3 @@
+[submodule "nicecomps"]
+	path = nicecomps
+	url = https://github.com/borneq/nicecomps

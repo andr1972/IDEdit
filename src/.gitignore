@@ -1,0 +1,7 @@
+backup/
+lib/
+*.exe
+*.lps
+idedit
+idedit.res
+
