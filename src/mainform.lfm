@@ -11,6 +11,7 @@ object Form1: TForm1
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
+  OnShow = FormShow
   LCLVersion = '2.0.6.0'
   object ToolBar1: TToolBar
     Left = 0
@@ -48,18 +49,27 @@ object Form1: TForm1
       OnClick = MenuItem1Click
       object miFileNew: TMenuItem
         Action = actFileNew
-        ShortCut = 16462
       end
       object MenuItem3: TMenuItem
         Caption = '-'
       end
       object miFileOpen: TMenuItem
         Action = actFileOpen
-        ShortCut = 16463
+      end
+      object MenuItem4: TMenuItem
+        Action = actRevert
+      end
+      object MenuItem5: TMenuItem
+        Action = actFileSave
+      end
+      object MenuItem6: TMenuItem
+        Action = actFileSaveAs
+      end
+      object MenuItem7: TMenuItem
+        Action = actFileSaveAll
       end
       object miFileClosePage: TMenuItem
         Action = actFileClosePage
-        ShortCut = 16499
       end
     end
     object MenuItem2: TMenuItem
@@ -75,12 +85,14 @@ object Form1: TForm1
       Caption = 'New'
       ImageIndex = 12
       OnExecute = actFileNewExecute
+      ShortCut = 16462
     end
     object actFileOpen: TAction
       Category = 'File'
       Caption = 'Open...'
       ImageIndex = 0
       OnExecute = actFileOpenExecute
+      ShortCut = 16463
     end
     object actFileClosePage: TAction
       Category = 'File'
@@ -88,6 +100,32 @@ object Form1: TForm1
       ImageIndex = 5
       OnExecute = actFileClosePageExecute
       OnUpdate = actFileClosePageUpdate
+      ShortCut = 16499
+    end
+    object actFileSave: TAction
+      Category = 'File'
+      Caption = 'Save'
+      ImageIndex = 4
+      OnExecute = actFileSaveExecute
+      OnUpdate = actFileSaveUpdate
+      ShortCut = 16467
+    end
+    object actFileSaveAs: TAction
+      Category = 'File'
+      Caption = 'Save As..'
+      ImageIndex = 14
+      OnExecute = actFileSaveAsExecute
+    end
+    object actFileSaveAll: TAction
+      Category = 'File'
+      Caption = 'Save all'
+      ImageIndex = 13
+      ShortCut = 24659
+    end
+    object actRevert: TAction
+      Category = 'File'
+      Caption = 'Revert'
+      ImageIndex = 9
     end
   end
   object imglFile16: TImageList

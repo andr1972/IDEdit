@@ -15,6 +15,8 @@ type
     function ComparePathWith(AOtherPath: string): integer;
     procedure Activate;
     function TryClose(): Boolean;
+    function Save: boolean;
+    function SaveAs(AFileName: string): boolean;
   end;
 
   IUntitledManager = interface ['{476DA6F2-AAED-4923-BBBA-6726E6F8914F}']
@@ -28,6 +30,8 @@ type
   end;}
 
   IDocumentFactory = interface ['{9FC64814-516F-4344-9961-FC0D45A7F3CA}']
+    function GetDocumentCount: integer;
+    function GetDocument(Index: integer): IDocument;
     function CreateNew(AFileName: string): IDocument;
     function GetActive: IDocument;
     function GetUntitledManager: IUntitledManager;

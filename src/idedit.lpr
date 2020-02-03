@@ -7,9 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  UniqueInstance,
-  SysUtils,
-  Forms, mainform, intfs, document, documentfactory, untitledmanager, hisyntax;
+  UniqueInstance, SysUtils, Forms, mainform, intfs, document, documentfactory,
+  untitledmanager, hisyntax, config;
 
 {$R *.res}
 
