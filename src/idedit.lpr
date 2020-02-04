@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   UniqueInstance, SysUtils, Forms, mainform, intfs, document, documentfactory,
-  untitledmanager, hisyntax, config;
+  untitledmanager, hisyntax, config, dlgSearchReplace;
 
 {$R *.res}
 
@@ -29,6 +29,7 @@ begin
   Application.CreateForm(TForm1, Form1);
   UniqInst.OnOtherInstance:=@Form1.UniqInstOtherInstance;
   UniqInst.Listen;
+  Application.CreateForm(TForm2, Form2);
   Application.Run;
 end.
 

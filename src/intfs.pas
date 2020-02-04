@@ -25,6 +25,10 @@ type
     procedure Revert;
     procedure CheckWithDisk;
     function ChangedOutside: boolean;
+    procedure ExecFind;
+    procedure ExecFindNext;
+    procedure ExecFindPrev;
+    procedure ExecReplace;
     property WordWrap: boolean read GetWordWrap write SetWordWrap;
   end;
 

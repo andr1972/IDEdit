@@ -5,7 +5,7 @@ unit document;
 interface
 
 uses
-  Classes, SysUtils, intfs, NicePages, ATSynEdit;
+  Classes, SysUtils, intfs, NicePages, ATSynEdit,ATSynEdit_Finder;
 
 type
 
@@ -25,9 +25,14 @@ type
     fRemoved: boolean;
     fChangedTime: boolean;
     fChangedSize: boolean;
+    LastUsedSearchDialog: TObject;
+    Finder: TATEditorFinder;
     procedure ReleaseUnusedDir(const NewName: string);
     function DoSaveFile: boolean;
     procedure GetFileTimeSize(bInit: boolean);
+    procedure ShowSearchReplaceDialog(AReplace: boolean);
+    procedure ReplaceText(textToFind,textToREplace: string);
+    procedure SearchText(textToFind: string; ABack: boolean);
   public
     constructor Create(AFactory: IDocumentFactory; ASheet: TNiceSheet; ASynEdit: TAtSynEdit);
     destructor Destroy; override;
@@ -45,12 +50,16 @@ type
     procedure Revert;
     procedure CheckWithDisk;
     function ChangedOutside: boolean;
+    procedure ExecFind;
+    procedure ExecFindNext;
+    procedure ExecFindPrev;
+    procedure ExecReplace;
   end;
 
 
 implementation
 uses
-  LCLType, Controls, Dialogs, dateutils;
+  LCLType, Controls, Dialogs, dateutils,dlgSearchReplace;
 
 { TDocument }
 
@@ -68,10 +77,13 @@ begin
   fUntitledNumber:=0;
   fAtSynEdit.OptRulerVisible:=false;
   fAtSynEdit.OptUnprintedVisible:=false;
+  Finder:= TATEditorFinder.Create;
+  Finder.Editor:= fAtSynEdit;
 end;
 
 destructor TDocument.Destroy;
 begin
+  Finder.Free;
   fUntitledManager.ReleaseNumber(fUntitledNumber);
   inherited Destroy;
 end;
@@ -215,6 +227,46 @@ begin
   end;
 end;
 
+procedure TDocument.ShowSearchReplaceDialog(AReplace: boolean);
+begin
+  Form2.cbReplace.Checked:=AReplace;
+  if (Form2.ShowModal = mrOk) and (Form2.comboSearchText.Text <> '') then
+  begin
+    LastUsedSearchDialog:=Form2;
+    if Form2.cbReplace.Checked then
+      ReplaceText(Form2.comboSearchText.Text, Form2.comboReplaceText.Text)
+    else
+      SearchText(Form2.comboSearchText.Text, false);
+  end;
+end;
+
+procedure TDocument.ReplaceText(textToFind, textToREplace: string);
+begin
+  //
+end;
+
+procedure TDocument.SearchText(textToFind: string; ABack: boolean);
+var
+  bChanged: boolean;
+begin
+  Finder.StrFind:=textToFind;
+  Finder.OptFromCaret:=true;
+  Finder.OptBack:=ABack;
+  if Finder.DoAction_FindOrReplace(false, false, false, bChanged) then
+  begin
+   // MemoRes.Text:= Format('(line %d)'#10, [Finder.MatchEdPos.Y+1]) +
+     // Ed.Strings.TextSubstring(Finder.MatchEdPos.X, Finder.MatchEdPos.Y, Finder.MatchEdEnd.X, Finder.MatchEdEnd.Y);
+    fAtSynEdit.DoGotoPos(
+      Point(Finder.MatchEdPos.X, Finder.MatchEdPos.Y),
+      Point(Finder.MatchEdEnd.X, Finder.MatchEdEnd.Y),
+      0, 0,
+      true,
+      true);
+  end
+  else
+    ShowMessage(textToFind +' not found');
+end;
+
 function TDocument.SaveAs(AFileName: string): boolean;
 begin
   result:=false;
@@ -262,6 +314,32 @@ end;
 function TDocument.ChangedOutside: boolean;
 begin
   result:=fChangedSize or fChangedTime;
+end;
+
+procedure TDocument.ExecFind;
+begin
+  ShowSearchReplaceDialog(False);
+end;
+
+procedure TDocument.ExecFindNext;
+begin
+  if LastUsedSearchDialog = nil then
+    ShowSearchReplaceDialog(False)
+  else
+    SearchText(Form2.comboSearchText.Text, false);
+end;
+
+procedure TDocument.ExecFindPrev;
+begin
+  if LastUsedSearchDialog = nil then
+    ShowSearchReplaceDialog(False)
+  else
+    SearchText(Form2.comboSearchText.Text, true);
+end;
+
+procedure TDocument.ExecReplace;
+begin
+  ShowSearchReplaceDialog(True);
 end;
 
 end.

@@ -19,14 +19,24 @@ type
     actFileSave: TAction;
     actFileSaveAs: TAction;
     actFileSaveAll: TAction;
+    actSearchReplace: TAction;
+    actSearchFindPrevious: TAction;
+    actSearchFindNext: TAction;
+    actSearchFind: TAction;
+    actlSearch: TActionList;
     actViewWordWrap: TAction;
     actlView: TActionList;
     actRevert: TAction;
     actlFile: TActionList;
     imglFile16: TImageList;
+    imglSearch16: TImageList;
     imglTb16: TImageList;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
+    MenuItem10: TMenuItem;
+    MenuItem11: TMenuItem;
+    MenuItem12: TMenuItem;
+    MenuItem13: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -34,6 +44,7 @@ type
     MenuItem6: TMenuItem;
     MenuItem7: TMenuItem;
     MenuItem8: TMenuItem;
+    MenuItem9: TMenuItem;
     miFileClosePage: TMenuItem;
     miFileOpen: TMenuItem;
     miFileNew: TMenuItem;
@@ -53,6 +64,14 @@ type
     procedure actFileSaveUpdate(Sender: TObject);
     procedure actRevertExecute(Sender: TObject);
     procedure actRevertUpdate(Sender: TObject);
+    procedure actSearchFindExecute(Sender: TObject);
+    procedure actSearchFindNextExecute(Sender: TObject);
+    procedure actSearchFindNextUpdate(Sender: TObject);
+    procedure actSearchFindPreviousExecute(Sender: TObject);
+    procedure actSearchFindPreviousUpdate(Sender: TObject);
+    procedure actSearchFindUpdate(Sender: TObject);
+    procedure actSearchReplaceExecute(Sender: TObject);
+    procedure actSearchReplaceUpdate(Sender: TObject);
     procedure actViewWordWrapExecute(Sender: TObject);
     procedure actViewWordWrapUpdate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
@@ -243,6 +262,46 @@ end;
 procedure TForm1.actRevertUpdate(Sender: TObject);
 begin
   actRevert.Enabled := (fDocumentFactory.GetDocumentCount>0) and (fDocumentFactory.GetActive.GetPath<>'');
+end;
+
+procedure TForm1.actSearchFindExecute(Sender: TObject);
+begin
+  fDocumentFactory.GetActive.ExecFind;
+end;
+
+procedure TForm1.actSearchFindNextExecute(Sender: TObject);
+begin
+  fDocumentFactory.GetActive.ExecFindNext;
+end;
+
+procedure TForm1.actSearchFindUpdate(Sender: TObject);
+begin
+  actSearchFind.Enabled := fDocumentFactory.GetDocumentCount>0;
+end;
+
+procedure TForm1.actSearchReplaceExecute(Sender: TObject);
+begin
+  fDocumentFactory.GetActive.ExecReplace;
+end;
+
+procedure TForm1.actSearchReplaceUpdate(Sender: TObject);
+begin
+  actSearchReplace.Enabled := fDocumentFactory.GetDocumentCount>0;
+end;
+
+procedure TForm1.actSearchFindNextUpdate(Sender: TObject);
+begin
+  actSearchFindNext.Enabled := fDocumentFactory.GetDocumentCount>0;
+end;
+
+procedure TForm1.actSearchFindPreviousExecute(Sender: TObject);
+begin
+  fDocumentFactory.GetActive.ExecFindPrev;
+end;
+
+procedure TForm1.actSearchFindPreviousUpdate(Sender: TObject);
+begin
+  actSearchFindPRevious.Enabled := fDocumentFactory.GetDocumentCount>0;
 end;
 
 procedure TForm1.actViewWordWrapExecute(Sender: TObject);
