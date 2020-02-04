@@ -207,6 +207,7 @@ function TDocument.DoSaveFile: boolean;
 begin
   fAtSynEdit.SaveToFile(fFileName);
   fAtSynEdit.Modified:=false;
+  fSheet.DrawTabs;
   GetFileTimeSize(true);
   result:=true;
 end;
