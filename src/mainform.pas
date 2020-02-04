@@ -86,8 +86,7 @@ type
     fWasActivated: boolean;
     function CmdLineOpenFiles: boolean;
     procedure AppActivate(Sender: TObject);
-    procedure AppRestore(Sender: TObject);
-    procedure WMSetFocus(var Message: TMessage); message WM_SETFOCUS;
+    procedure TabDraw(Control: TNicePages; Index: Integer; IsActive: Boolean; ACanvas: TCanvas; var R: TRect; var DefaultDraw: boolean);
   public
     procedure UniqInstOtherInstance(Sender: TObject;
       ParamCount: Integer; const Parameters: array of String);
@@ -113,9 +112,8 @@ begin
   //EdNotebook.OnBeforeCloseQuery:=@TabBeforeCloseQuery;
   //EdNotebook.OnCloseQuery:=@TabCloseQuery;
   //EdNotebook.OnClose:=@TabClose;
-  //EdNotebook.OnDrawTab:=@TabDraw;
+  fNotebook.OnDrawTab:=@TabDraw;
   fDocumentFactory:=TDocumentFactory.Create(fNotebook);
-  Application.OnRestore:=@AppRestore;
   Application.AddOnActivateHandler(@AppActivate,false);
 end;
 
@@ -199,12 +197,14 @@ begin
   end;
 end;
 
-procedure TForm1.AppRestore(Sender: TObject);
+procedure TForm1.TabDraw(Control: TNicePages; Index: Integer;
+  IsActive: Boolean; ACanvas: TCanvas; var R: TRect; var DefaultDraw: boolean);
+var
+  LDocument: IDocument;
 begin
-end;
-
-procedure TForm1.WMSetFocus(var Message: TMessage);
-begin
+  LDocument := fDocumentFactory.GetDocument(Index);
+  if LDocument.GetModified then ACanvas.Font.Color:=clRed
+  else ACanvas.Font.Color:=clBlack;
 end;
 
 procedure TForm1.UniqInstOtherInstance(Sender: TObject;

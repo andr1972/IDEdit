@@ -33,6 +33,7 @@ type
     procedure ShowSearchReplaceDialog(AReplace: boolean);
     procedure ReplaceText(textToFind,textToREplace: string);
     procedure SearchText(textToFind: string; ABack: boolean);
+    procedure ATSynEdit1ChangeModified(Sender: TObject);
   public
     constructor Create(AFactory: IDocumentFactory; ASheet: TNiceSheet; ASynEdit: TAtSynEdit);
     destructor Destroy; override;
@@ -54,6 +55,7 @@ type
     procedure ExecFindNext;
     procedure ExecFindPrev;
     procedure ExecReplace;
+    function GetModified: boolean;
   end;
 
 
@@ -77,6 +79,7 @@ begin
   fUntitledNumber:=0;
   fAtSynEdit.OptRulerVisible:=false;
   fAtSynEdit.OptUnprintedVisible:=false;
+  fAtSynEdit.OnChangeModified:=@ATSynEdit1ChangeModified;
   Finder:= TATEditorFinder.Create;
   Finder.Editor:= fAtSynEdit;
 end;
@@ -267,6 +270,11 @@ begin
     ShowMessage(textToFind +' not found');
 end;
 
+procedure TDocument.ATSynEdit1ChangeModified(Sender: TObject);
+begin
+  fSheet.DrawTabs;
+end;
+
 function TDocument.SaveAs(AFileName: string): boolean;
 begin
   result:=false;
@@ -340,6 +348,11 @@ end;
 procedure TDocument.ExecReplace;
 begin
   ShowSearchReplaceDialog(True);
+end;
+
+function TDocument.GetModified: boolean;
+begin
+  result:=fAtSynEdit.Modified;
 end;
 
 end.

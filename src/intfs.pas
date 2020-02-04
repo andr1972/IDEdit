@@ -29,6 +29,7 @@ type
     procedure ExecFindNext;
     procedure ExecFindPrev;
     procedure ExecReplace;
+    function GetModified: boolean;
     property WordWrap: boolean read GetWordWrap write SetWordWrap;
   end;
 
