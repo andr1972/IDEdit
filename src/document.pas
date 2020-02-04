@@ -206,6 +206,7 @@ end;
 function TDocument.DoSaveFile: boolean;
 begin
   fAtSynEdit.SaveToFile(fFileName);
+  GetFileTimeSize(true);
 end;
 
 procedure TDocument.GetFileTimeSize(bInit: boolean);
