@@ -22,6 +22,9 @@ type
     function TryClose(): Boolean;
     function Save: boolean;
     function SaveAs(AFileName: string): boolean;
+    procedure Revert;
+    procedure CheckWithDisk;
+    function ChangedOutside: boolean;
     property WordWrap: boolean read GetWordWrap write SetWordWrap;
   end;
 

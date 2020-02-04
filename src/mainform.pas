@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Menus, ActnList,
-  ComCtrls, ATSynEdit, NicePages, intfs;
+  ComCtrls, ExtCtrls, ATSynEdit, NicePages, intfs, Messages;
 
 type
 
@@ -39,6 +39,7 @@ type
     miFileNew: TMenuItem;
     OpenDialog: TOpenDialog;
     SaveDialog: TSaveDialog;
+    Timer1: TTimer;
     ToolBar1: TToolBar;
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
@@ -50,13 +51,14 @@ type
     procedure actFileSaveAsExecute(Sender: TObject);
     procedure actFileSaveExecute(Sender: TObject);
     procedure actFileSaveUpdate(Sender: TObject);
+    procedure actRevertExecute(Sender: TObject);
+    procedure actRevertUpdate(Sender: TObject);
     procedure actViewWordWrapExecute(Sender: TObject);
     procedure actViewWordWrapUpdate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FormShow(Sender: TObject);
-    procedure MenuItem1Click(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     fNotebook: TNicePages;
     fDocumentFactory: IDocumentFactory;
@@ -66,6 +68,7 @@ type
     function CmdLineOpenFiles: boolean;
     procedure AppActivate(Sender: TObject);
     procedure AppRestore(Sender: TObject);
+    procedure WMSetFocus(var Message: TMessage); message WM_SETFOCUS;
   public
     procedure UniqInstOtherInstance(Sender: TObject;
       ParamCount: Integer; const Parameters: array of String);
@@ -93,9 +96,8 @@ begin
   //EdNotebook.OnClose:=@TabClose;
   //EdNotebook.OnDrawTab:=@TabDraw;
   fDocumentFactory:=TDocumentFactory.Create(fNotebook);
-  Application.OnActivate := @AppActivate;
   Application.OnRestore:=@AppRestore;
-  //ShowMessage(getConfigPath);
+  Application.AddOnActivateHandler(@AppActivate,false);
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -118,14 +120,10 @@ begin
       fNotebook.ActiveNext();
   end;
 end;
-const licznik: integer = 0;
-procedure TForm1.FormShow(Sender: TObject);
-begin
-end;
 
-procedure TForm1.MenuItem1Click(Sender: TObject);
+procedure TForm1.Timer1Timer(Sender: TObject);
 begin
-
+  AppActivate(Sender);
 end;
 
 procedure TForm1.DoOpenFile(AFileName: string);
@@ -161,13 +159,33 @@ begin
 end;
 
 procedure TForm1.AppActivate(Sender: TObject);
+var
+  i: integer;
+  LDocument: IDocument;
 begin
+  for i := 0 to fDocumentFactory.GetDocumentCount-1 do
+  begin
+    LDocument := fDocumentFactory.GetDocument(i);
+    LDocument.CheckWithDisk;
+  end;
+  for i := 0 to fDocumentFactory.GetDocumentCount-1 do
+  begin
+    LDocument := fDocumentFactory.GetDocument(i);
+    if LDocument.ChangedOutside then
+    begin
+      LDocument.Activate;
+      if MessageDlg('File ' + LDocument.GetPath + 'changed outsize. Revert?', mtWarning, [mbYes, mbCancel], 0) = mrYes then
+           LDocument.Revert;
+    end;
+  end;
 end;
 
 procedure TForm1.AppRestore(Sender: TObject);
 begin
-  inc(licznik);
-  Caption:=IntToStr(licznik);
+end;
+
+procedure TForm1.WMSetFocus(var Message: TMessage);
+begin
 end;
 
 procedure TForm1.UniqInstOtherInstance(Sender: TObject;
@@ -215,6 +233,16 @@ end;
 procedure TForm1.actFileSaveUpdate(Sender: TObject);
 begin
   actFileSave.Enabled := fDocumentFactory.GetDocumentCount>0;
+end;
+
+procedure TForm1.actRevertExecute(Sender: TObject);
+begin
+  fDocumentFactory.GetActive.Revert;
+end;
+
+procedure TForm1.actRevertUpdate(Sender: TObject);
+begin
+  actRevert.Enabled := (fDocumentFactory.GetDocumentCount>0) and (fDocumentFactory.GetActive.GetPath<>'');
 end;
 
 procedure TForm1.actViewWordWrapExecute(Sender: TObject);

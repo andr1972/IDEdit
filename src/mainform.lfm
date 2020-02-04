@@ -11,7 +11,6 @@ object Form1: TForm1
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
-  OnShow = FormShow
   LCLVersion = '2.0.6.0'
   object ToolBar1: TToolBar
     Left = 0
@@ -46,7 +45,6 @@ object Form1: TForm1
     object MenuItem1: TMenuItem
       Caption = '&File'
       SubMenuImages = imglFile16
-      OnClick = MenuItem1Click
       object miFileNew: TMenuItem
         Action = actFileNew
       end
@@ -129,6 +127,8 @@ object Form1: TForm1
       Category = 'File'
       Caption = 'Revert'
       ImageIndex = 9
+      OnExecute = actRevertExecute
+      OnUpdate = actRevertUpdate
     end
   end
   object imglFile16: TImageList
@@ -1027,5 +1027,11 @@ object Form1: TForm1
       OnExecute = actViewWordWrapExecute
       OnUpdate = actViewWordWrapUpdate
     end
+  end
+  object Timer1: TTimer
+    Interval = 2000
+    OnTimer = Timer1Timer
+    left = 352
+    top = 64
   end
 end

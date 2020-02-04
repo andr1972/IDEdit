@@ -19,9 +19,15 @@ type
     fFactory: IDocumentFactory;
 //    fHiSyntax: IHiSyntax;
     fUntitledManager: IUntitledManager;
-    FUntitledNumber: integer;
+    fUntitledNumber: integer;
+    fFileTime: TDateTime;
+    fFileSize: int64;
+    fRemoved: boolean;
+    fChangedTime: boolean;
+    fChangedSize: boolean;
     procedure ReleaseUnusedDir(const NewName: string);
     function DoSaveFile: boolean;
+    procedure GetFileTimeSize(bInit: boolean);
   public
     constructor Create(AFactory: IDocumentFactory; ASheet: TNiceSheet; ASynEdit: TAtSynEdit);
     destructor Destroy; override;
@@ -36,12 +42,15 @@ type
     function SaveAs(AFileName: string): boolean;
     function GetWordWrap: boolean;
     procedure SetWordWrap(AValue: boolean);
+    procedure Revert;
+    procedure CheckWithDisk;
+    function ChangedOutside: boolean;
   end;
 
 
 implementation
 uses
-  LCLType, Controls, Dialogs;
+  LCLType, Controls, Dialogs, dateutils;
 
 { TDocument }
 
@@ -56,14 +65,14 @@ begin
   fFactory:=AFactory;
   //fHiSyntax:=fFactory.GetHiSyntax;
   fUntitledManager:=fFactory.GetUntitledManager;
-  FUntitledNumber:=0;
+  fUntitledNumber:=0;
   fAtSynEdit.OptRulerVisible:=false;
   fAtSynEdit.OptUnprintedVisible:=false;
 end;
 
 destructor TDocument.Destroy;
 begin
-  fUntitledManager.ReleaseNumber(FUntitledNumber);
+  fUntitledManager.ReleaseNumber(fUntitledNumber);
   inherited Destroy;
 end;
 
@@ -78,7 +87,7 @@ begin
     Result := ExtractFileName(fFileName)
   else
   begin
-    if FUntitledNumber=0 then
+    if fUntitledNumber=0 then
       fUntitledNumber:=fUntitledManager.GetNewNumber();
     Result := 'Untitled' + IntToStr(fUntitledNumber)
   end;
@@ -94,6 +103,7 @@ begin
     fAtSynEdit.OptWrapMode:=cWrapOn;
 //    fAtSynEdit.Highlighter := fHiSyntax.GetHighlighterByFileName(AFileName);
   end;
+  GetFileTimeSize(true);
 end;
 
 class function TDocument.CompareFileNames(const S1: string; const S2: string): integer;
@@ -165,6 +175,46 @@ begin
   fAtSynEdit.SaveToFile(fFileName);
 end;
 
+procedure TDocument.GetFileTimeSize(bInit: boolean);
+var
+  sr: TSearchRec;
+  SystemTime: TSystemTime;
+  newFileTime: TDateTime;
+  newFileSize: int64;
+begin
+  fChangedTime:=false;
+  fChangedSize:=false;
+  if fFileName='' then
+  begin
+    fFileTime:=TDateTime(0);
+    fFileSize:=0;
+    fRemoved:=false;
+  end else
+  if FindFirst(fFileName, faAnyFile, sr) = 0 then
+  begin
+{$ifdef windows}
+    FileTimeToSystemTime(sr.FindData.ftLastWriteTime, SystemTime);
+    newFileTime := SystemTimeToDateTime(SystemTime);
+{$else}
+    newFileTime := LocalTimeToUniversal(FileDateToDateTime(sr.Time));
+{$endif}
+    newFileSize:=sr.Size;
+    fRemoved:=false;
+    if not bInit then
+    begin
+      if newFileTime<>fFileTime then fChangedTime:=true;
+      if newFileSize>fFileSize then fChangedSize:=true;
+    end;
+    fFileTime:=newFileTime;
+    fFileSize:=newFileSize;
+  end else
+  begin
+    fFileTime:=TDateTime(0);
+    fFileSize:=0;
+    fRemoved:=true;
+  end;
+end;
+
 function TDocument.SaveAs(AFileName: string): boolean;
 begin
   result:=false;
@@ -197,6 +247,21 @@ begin
   else
     opt:=cWrapOff;
   fAtSynEdit.OptWrapMode:=opt;
+end;
+
+procedure TDocument.Revert;
+begin
+  OpenFile(fFileName);
+end;
+
+procedure TDocument.CheckWithDisk;
+begin
+  GetFileTimeSize(false);
+end;
+
+function TDocument.ChangedOutside: boolean;
+begin
+  result:=fChangedSize or fChangedTime;
 end;
 
 end.
