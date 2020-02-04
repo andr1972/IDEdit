@@ -205,7 +205,7 @@ begin
     if LDocument.ChangedOutside then
     begin
       LDocument.Activate;
-      if MessageDlg('File ' + LDocument.GetPath + 'changed outsize. Revert?', mtWarning, [mbYes, mbCancel], 0) = mrYes then
+      if MessageDlg('File ' + LDocument.GetPath + ' changed outside. Revert?', mtWarning, [mbYes, mbCancel], 0) = mrYes then
            LDocument.Revert;
     end;
   end;
