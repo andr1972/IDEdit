@@ -5,7 +5,7 @@ unit intfs;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, NicePages;
 
 type
 
@@ -31,6 +31,10 @@ type
     procedure ExecReplace;
     function GetModified: boolean;
     property WordWrap: boolean read GetWordWrap write SetWordWrap;
+    function Consider: TConsiderEnum;
+    procedure ActionsBeforeClose;
+    procedure AskSaveChangesBeforeClosing(var CanClose: TCloseEnum);
+    function AskSaveChangesBeforeReopen: TCloseEnum;
   end;
 
   IUntitledManager = interface ['{476DA6F2-AAED-4923-BBBA-6726E6F8914F}']
@@ -38,10 +42,10 @@ type
     procedure ReleaseNumber(ANumber: integer);
   end;
 
-{  IHiSyntax = interface ['{F0FF0ECB-A19B-41EC-9696-23FF28437F12}']
+  (*IHiSyntax = interface ['{F0FF0ECB-A19B-41EC-9696-23FF28437F12}']
     function GetHighlighterByLanguageName(ALang: string): TSynCustomFoldHighlighter;
     function GetHighlighterByFileName(APath: string): TSynCustomFoldHighlighter;
-  end;}
+  end;*)
 
   IDocumentFactory = interface ['{9FC64814-516F-4344-9961-FC0D45A7F3CA}']
     function GetDocumentCount: integer;
@@ -49,6 +53,7 @@ type
     function CreateNew(AFileName: string): IDocument;
     function GetActive: IDocument;
     function GetUntitledManager: IUntitledManager;
+    procedure TryCloseAll;
 //    function GetHiSyntax: IHiSyntax;
   end;
 

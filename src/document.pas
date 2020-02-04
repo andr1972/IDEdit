@@ -8,7 +8,6 @@ uses
   Classes, SysUtils, intfs, NicePages, ATSynEdit,ATSynEdit_Finder;
 
 type
-
   { TDocument }
 
   TDocument = class(TInterfacedObject, IDocument)
@@ -34,6 +33,7 @@ type
     procedure ReplaceText(textToFind,textToREplace: string);
     procedure SearchText(textToFind: string; ABack: boolean);
     procedure ATSynEdit1ChangeModified(Sender: TObject);
+    function IsEmpty: boolean;
   public
     constructor Create(AFactory: IDocumentFactory; ASheet: TNiceSheet; ASynEdit: TAtSynEdit);
     destructor Destroy; override;
@@ -56,12 +56,30 @@ type
     procedure ExecFindPrev;
     procedure ExecReplace;
     function GetModified: boolean;
+    function Consider: TConsiderEnum;
+    procedure ActionsBeforeClose;
+    procedure AskSaveChangesBeforeClosing(var CanClose: TCloseEnum);
+    function AskSaveChangesBeforeReopen: TCloseEnum;
   end;
 
 
 implementation
 uses
-  LCLType, Controls, Dialogs, dateutils,dlgSearchReplace;
+  LCLType, Controls, Dialogs, dateutils,dlgSearchReplace,Forms;
+
+resourcestring
+  SInsert = 'Insert';
+  SOverwrite = 'Overwrite';
+  SReadOnly = 'Read Only';
+  SNonameFileTitle = 'Untitled';
+  SEditorCaption = 'Editor';
+
+  SAskSaveWhenRemoved = 'The text in the "%s" file has removed.'#13#10#13#10 +
+    'Do you want to save text?';
+  SAskSavePrevious = 'The text in the "%s" file has outside changed.'#13#10#13#10 +
+    'Do you want to save text?';
+  SAskSaveChanges = 'The text in the "%s" file has been changed.'#13#10#13#10 +
+    'Do you want to save the modifications? (No = close and discard changes)';
 
 { TDocument }
 
@@ -275,6 +293,12 @@ begin
   fSheet.DrawTabs;
 end;
 
+function TDocument.IsEmpty: boolean;
+begin
+  Result := (fAtSynEdit.Strings.Count = 0) or (fAtSynEdit.Strings.Count = 1) and
+    (fAtSynEdit.Strings.Lines[0] = '');
+end;
+
 function TDocument.SaveAs(AFileName: string): boolean;
 begin
   result:=false;
@@ -353,6 +377,69 @@ end;
 function TDocument.GetModified: boolean;
 begin
   result:=fAtSynEdit.Modified;
+end;
+
+function TDocument.Consider: TConsiderEnum;
+begin
+  if not GetModified or IsEmpty then
+    Result := coCanClose
+  else if GetPath <> '' then
+    Result := coCanSave
+  else
+    Result := coSaveAs;
+end;
+
+procedure TDocument.ActionsBeforeClose;
+begin
+  if fFileName <> '' then
+    {with (Application.MainForm as TMainForm) do
+    begin
+      EdFolders.Put(fFileName);
+      UpdateMruMenu;
+      UpdateFoldersMenu;
+    end};
+  if fUntitledNumber <> -1 then
+    fUntitledManager.ReleaseNumber(fUntitledNumber);
+  ReleaseUnusedDir('');
+end;
+
+procedure TDocument.AskSaveChangesBeforeClosing(var CanClose: TCloseEnum);
+var
+  ModalResult: TModalResult;
+begin
+  if IsEmpty then
+  begin
+    CanClose := clClose;
+    exit;
+  end;
+  if CanClose = clCloseAllDiscard then exit;
+  if CanClose = clCloseAllSave then
+  begin
+    if not DoSaveFile then
+      CanClose := clCancel;
+    exit;
+  end;
+  ModalResult := MessageDlg(Format(SAskSaveChanges, [GetTitle]),
+    mtWarning, [mbYes, mbYesToAll, mbNo, mbNoToAll, mbCancel], 0);
+  case ModalResult of
+    mrYes: if DoSaveFile then
+        CanClose := clClose
+      else
+        CanClose := clNo;
+    mrYesToAll: if DoSaveFile then
+        CanClose := clCloseAllSave
+      else
+        CanClose := clNo;
+    mrNo: CanClose := clClose;
+    mrNoToAll: CanClose := clCloseAllDiscard;
+    else
+      CanClose := clCancel;
+  end;
+end;
+
+function TDocument.AskSaveChangesBeforeReopen: TCloseEnum;
+begin
+  raise Exception.Create('unimplemented');
 end;
 
 end.

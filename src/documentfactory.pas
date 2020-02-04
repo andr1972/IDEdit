@@ -23,6 +23,7 @@ type
     function CreateNew(AFileName: string): IDocument;
     function GetActive: IDocument;
     function GetUntitledManager: IUntitledManager;
+    procedure TryCloseAll;
 //    function GetHiSyntax: IHiSyntax;
   end;
 
@@ -75,6 +76,11 @@ end;
 function TDocumentFactory.GetUntitledManager: IUntitledManager;
 begin
   Result := fUntitledManager;
+end;
+
+procedure TDocumentFactory.TryCloseAll;
+begin
+  fNotebook.TryCloseAll();
 end;
 
 {function TDocumentFactory.GetHiSyntax: IHiSyntax;

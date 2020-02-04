@@ -75,7 +75,9 @@ type
     procedure actViewWordWrapExecute(Sender: TObject);
     procedure actViewWordWrapUpdate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Timer1Timer(Sender: TObject);
   private
@@ -86,6 +88,9 @@ type
     fWasActivated: boolean;
     function CmdLineOpenFiles: boolean;
     procedure AppActivate(Sender: TObject);
+    procedure TabBeforeCloseQuery(Control: TNicePages; Index: Integer; var Consider: TConsiderEnum);
+    procedure TabCloseQuery(Control: TNicePages; Index: Integer; var CanClose: TCloseEnum);
+    procedure TabClose(Control: TNicePages; Index: Integer);
     procedure TabDraw(Control: TNicePages; Index: Integer; IsActive: Boolean; ACanvas: TCanvas; var R: TRect; var DefaultDraw: boolean);
   public
     procedure UniqInstOtherInstance(Sender: TObject;
@@ -109,12 +114,21 @@ begin
   InsertControl(fNotebook);
   fNotebook.Align:=alClient;
   fNotebook.TabPosition:=tpBottom;
-  //EdNotebook.OnBeforeCloseQuery:=@TabBeforeCloseQuery;
-  //EdNotebook.OnCloseQuery:=@TabCloseQuery;
-  //EdNotebook.OnClose:=@TabClose;
+  fNotebook.OnBeforeCloseQuery:=@TabBeforeCloseQuery;
+  fNotebook.OnCloseQuery:=@TabCloseQuery;
+  fNotebook.OnClose:=@TabClose;
   fNotebook.OnDrawTab:=@TabDraw;
   fDocumentFactory:=TDocumentFactory.Create(fNotebook);
   Application.AddOnActivateHandler(@AppActivate,false);
+end;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+  if fDocumentFactory<> nil then
+    fDocumentFactory.TryCloseAll;
+  {WriteIniSettings;
+  NewIniTimeSize;
+  EdFolders.Free;}
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -195,6 +209,32 @@ begin
            LDocument.Revert;
     end;
   end;
+end;
+
+procedure TForm1.TabBeforeCloseQuery(Control: TNicePages; Index: Integer;
+  var Consider: TConsiderEnum);
+var
+  LDocument: IDocument;
+begin
+  LDocument := fDocumentFactory.GetDocument(Index);
+  Consider := LDocument.Consider();
+end;
+
+procedure TForm1.TabCloseQuery(Control: TNicePages; Index: Integer;
+  var CanClose: TCloseEnum);
+var
+  LDocument: IDocument;
+begin
+  LDocument := fDocumentFactory.GetDocument(Index);
+  LDocument.AskSaveChangesBeforeClosing(CanClose);
+end;
+
+procedure TForm1.TabClose(Control: TNicePages; Index: Integer);
+var
+  LDocument: IDocument;
+begin
+  LDocument := fDocumentFactory.GetDocument(Index);
+  LDocument.ActionsBeforeClose();
 end;
 
 procedure TForm1.TabDraw(Control: TNicePages; Index: Integer;
@@ -327,6 +367,11 @@ begin
   finally
     fWasActivated := true
   end;
+end;
+
+procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+begin
+  CanClose := fNotebook.TryCloseAll=clClose;
 end;
 
 procedure TForm1.actFileNewExecute(Sender: TObject);
