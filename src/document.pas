@@ -206,6 +206,7 @@ end;
 function TDocument.DoSaveFile: boolean;
 begin
   fAtSynEdit.SaveToFile(fFileName);
+  fAtSynEdit.Modified:=false;
   GetFileTimeSize(true);
 end;
 
