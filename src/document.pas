@@ -208,6 +208,7 @@ begin
   fAtSynEdit.SaveToFile(fFileName);
   fAtSynEdit.Modified:=false;
   GetFileTimeSize(true);
+  result:=true;
 end;
 
 procedure TDocument.GetFileTimeSize(bInit: boolean);
