@@ -61,7 +61,6 @@ begin
   syn.BorderStyle := bsNone;
   syn.Align := alClient;
   sheet.InsertControl(syn);
-  sheet.FocusedControl := syn;
   Result := TDocument.Create(self, sheet, syn);
 end;
 

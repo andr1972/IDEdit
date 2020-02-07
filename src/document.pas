@@ -5,7 +5,7 @@ unit document;
 interface
 
 uses
-  Classes, SysUtils, intfs, NicePages, ATSynEdit,ATSynEdit_Finder;
+  Classes, SysUtils, intfs, NicePages, ATSynEdit,ATSynEdit_Finder,ExtCtrls;
 
 type
   { TDocument }
@@ -26,6 +26,7 @@ type
     fChangedSize: boolean;
     LastUsedSearchDialog: TObject;
     Finder: TATEditorFinder;
+    FTimer: TTimer;
     procedure ReleaseUnusedDir(const NewName: string);
     function DoSaveFile: boolean;
     procedure GetFileTimeSize(bInit: boolean);
@@ -34,6 +35,7 @@ type
     procedure SearchText(textToFind: string; ABack: boolean);
     procedure ATSynEdit1ChangeModified(Sender: TObject);
     function IsEmpty: boolean;
+    procedure Notify(Sender: TObject);
   public
     constructor Create(AFactory: IDocumentFactory; ASheet: TNiceSheet; ASynEdit: TAtSynEdit);
     destructor Destroy; override;
@@ -60,6 +62,7 @@ type
     procedure ActionsBeforeClose;
     procedure AskSaveChangesBeforeClosing(var CanClose: TCloseEnum);
     function AskSaveChangesBeforeReopen: TCloseEnum;
+    procedure AfterActivation;
   end;
 
 
@@ -100,10 +103,15 @@ begin
   fAtSynEdit.OnChangeModified:=@ATSynEdit1ChangeModified;
   Finder:= TATEditorFinder.Create;
   Finder.Editor:= fAtSynEdit;
+  FTimer:=TTimer.Create(nil);
+  FTimer.Interval:=50;
+  FTimer.Enabled:=false;
+  FTimer.OnTimer:=@Notify;
 end;
 
 destructor TDocument.Destroy;
 begin
+  FTimer.Free;
   Finder.Free;
   fUntitledManager.ReleaseNumber(fUntitledNumber);
   inherited Destroy;
@@ -444,6 +452,18 @@ end;
 function TDocument.AskSaveChangesBeforeReopen: TCloseEnum;
 begin
   raise Exception.Create('unimplemented');
+  result:=clError;
+end;
+
+procedure TDocument.AfterActivation;
+begin
+  FTImer.Enabled:=true;
+end;
+
+procedure TDocument.Notify(Sender: TObject);
+begin
+  FTImer.Enabled:=false;
+  fAtSynEdit.SetFocus; //set focus must be after while
 end;
 
 end.

@@ -35,6 +35,7 @@ type
     procedure ActionsBeforeClose;
     procedure AskSaveChangesBeforeClosing(var CanClose: TCloseEnum);
     function AskSaveChangesBeforeReopen: TCloseEnum;
+    procedure AfterActivation;
   end;
 
   IUntitledManager = interface ['{476DA6F2-AAED-4923-BBBA-6726E6F8914F}']

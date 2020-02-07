@@ -92,6 +92,7 @@ type
     procedure TabCloseQuery(Control: TNicePages; Index: Integer; var CanClose: TCloseEnum);
     procedure TabClose(Control: TNicePages; Index: Integer);
     procedure TabDraw(Control: TNicePages; Index: Integer; IsActive: Boolean; ACanvas: TCanvas; var R: TRect; var DefaultDraw: boolean);
+    procedure ActivateSheet(Control: TNicePages; Index: integer);
   public
     procedure UniqInstOtherInstance(Sender: TObject;
       ParamCount: Integer; const Parameters: array of String);
@@ -118,6 +119,7 @@ begin
   fNotebook.OnCloseQuery:=@TabCloseQuery;
   fNotebook.OnClose:=@TabClose;
   fNotebook.OnDrawTab:=@TabDraw;
+  fNotebook.OnActivateSheet:=@ActivateSheet;
   fDocumentFactory:=TDocumentFactory.Create(fNotebook);
   Application.AddOnActivateHandler(@AppActivate,false);
 end;
@@ -245,6 +247,14 @@ begin
   LDocument := fDocumentFactory.GetDocument(Index);
   if LDocument.GetModified then ACanvas.Font.Color:=clRed
   else ACanvas.Font.Color:=clBlack;
+end;
+
+procedure TForm1.ActivateSheet(Control: TNicePages; Index: integer);
+var
+  LDocument: IDocument;
+begin
+  LDocument := fDocumentFactory.GetDocument(Index);
+  LDocument.AfterActivation;
 end;
 
 procedure TForm1.UniqInstOtherInstance(Sender: TObject;
